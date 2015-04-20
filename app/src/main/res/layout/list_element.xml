@@ -8,22 +8,21 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New msgid"
-        android:id="@+id/itemMsgId"
-        android:layout_weight="0" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="New msg"
         android:id="@+id/itemMsg"
         android:layout_weight="1" />
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="New ts"
         android:id="@+id/itemTs"
-        android:layout_weight="0" />
+        android:layout_weight="0"
+        android:layout_marginLeft="40dp" />
 
 </LinearLayout>

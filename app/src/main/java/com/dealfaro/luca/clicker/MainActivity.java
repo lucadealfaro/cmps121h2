@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -104,11 +105,11 @@ public class MainActivity extends ActionBarActivity {
             }
 
             // Fills in the view.
-            TextView tvMsgId = (TextView) newView.findViewById(R.id.itemMsgId);
+            //TextView tvMsgId = (TextView) newView.findViewById(R.id.itemMsgId);
             TextView tvMsg = (TextView) newView.findViewById(R.id.itemMsg);
             TextView tvTs = (TextView) newView.findViewById(R.id.itemTs);
 
-            tvMsgId.setText(w.msgid);
+            //tvMsgId.setText(w.msgid);
             tvMsg.setText(w.msg);
             tvTs.setText(w.ts);
 
@@ -141,6 +142,7 @@ public class MainActivity extends ActionBarActivity {
         runInit();
     }
 
+    //this function initalizes the listview with messages from the last known location
     public void runInit() {
         // Then, we start the call.
         GetMessageSpec myCallSpec = new GetMessageSpec();
@@ -181,17 +183,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // First super, then do stuff.
-        // Let us display the previous posts, if any.
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        String result = settings.getString(PREF_POSTS, null);
-        if (result != null) {
-            //displayResult(result);
-        }
-        super.onResume();
 
-        // Add your code here.
-        // Set some default...
         // Then start to request location updates, directing them to locationListener.
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
@@ -253,6 +245,10 @@ public class MainActivity extends ActionBarActivity {
         // Get the text we want to send.
         EditText et = (EditText) findViewById(R.id.editText);
         String msg = et.getText().toString();
+        if (msg.equals("")) return;
+
+        startSpinner();
+
         Log.i(LOG_TAG, "submitting " + msg);
         // Then, we start the call.
         PostMessageSpec myCallSpec = new PostMessageSpec();
@@ -292,7 +288,7 @@ public class MainActivity extends ActionBarActivity {
     public void clickRefresh(View v) {
         // Then, we start the call.
         GetMessageSpec myCallSpec = new GetMessageSpec();
-
+        startSpinner();
 
         myCallSpec.url = SERVER_URL_PREFIX + "get_local";
         myCallSpec.context = MainActivity.this;
@@ -325,6 +321,14 @@ public class MainActivity extends ActionBarActivity {
         uploader = new ServerCall();
         uploader.execute(myCallSpec);
 
+    }
+    private void startSpinner() {
+        ProgressBar spinner = (ProgressBar) findViewById(R.id.progressBar);
+        spinner.setVisibility(View.VISIBLE);
+    }
+    private void stopSpinner() {
+        ProgressBar spinner = (ProgressBar) findViewById(R.id.progressBar);
+        spinner.setVisibility(View.INVISIBLE);
     }
 
     private String reallyComputeHash(String s) {
@@ -362,7 +366,12 @@ public class MainActivity extends ActionBarActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString(PREF_POSTS, result);
                 editor.commit();
+
+                //now lets clear the edit text
+                EditText et = (EditText) findViewById(R.id.editText);
+                et.setText("");
             }
+            stopSpinner();
         }
     }
     class GetMessageSpec extends ServerCallSpec {
@@ -381,6 +390,7 @@ public class MainActivity extends ActionBarActivity {
                 editor.putString(PREF_POSTS, result);
                 editor.commit();
             }
+            stopSpinner();
         }
     }
 
@@ -405,7 +415,7 @@ public class MainActivity extends ActionBarActivity {
             Log.d(LOG_TAG, loggz);
 
             ListElement ael = new ListElement();
-            ael.msgid = "";
+            //ael.msgid = "";
             ael.msg = msg;
             ael.ts = ts;
             aList.add(ael);
