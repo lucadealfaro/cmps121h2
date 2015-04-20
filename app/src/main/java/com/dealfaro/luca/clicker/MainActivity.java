@@ -24,6 +24,8 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import org.w3c.dom.Text;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
@@ -58,7 +60,8 @@ public class MainActivity extends ActionBarActivity {
 
     // Uploader.
     private ServerCall uploader;
-
+    private double curr_lat = 20.3;
+    private double curr_long = 20.3;
 
     private ArrayList<String> accountList;
 
@@ -132,10 +135,48 @@ public class MainActivity extends ActionBarActivity {
         super.onStart();
 
         //init last location
-        lastLocation.setLatitude(20.3);
-        lastLocation.setLongitude(20.3);
+        lastLocation.setLatitude(curr_lat);
+        lastLocation.setLongitude(curr_long);
+        updateLatLong();
+        runInit();
     }
 
+    public void runInit() {
+        // Then, we start the call.
+        GetMessageSpec myCallSpec = new GetMessageSpec();
+
+
+        myCallSpec.url = SERVER_URL_PREFIX + "get_local";
+        myCallSpec.context = MainActivity.this;
+        // Let's add the parameters.
+        HashMap<String,String> m = new HashMap<String,String>();
+
+        Location thisLocation = lastLocation;
+
+        if (thisLocation == null) {
+            Log.i(LOG_TAG, "Location has not been initialized, quitting");
+            return;
+        }
+
+
+        double lat = curr_lat;
+        double longit = curr_long;
+
+        Log.i(LOG_TAG, "using this as lat " + lat);
+        Log.i(LOG_TAG, "using this as long " + longit);
+
+        m.put("lat", Double.toString(lat));
+        m.put("lng", Double.toString(longit));
+
+        myCallSpec.setParams(m);
+        // Actual server call.
+        if (uploader != null) {
+            // There was already an upload in progress.
+            uploader.cancel(true);
+        }
+        uploader = new ServerCall();
+        uploader.execute(myCallSpec);
+    }
 
     @Override
     protected void onResume() {
@@ -145,9 +186,10 @@ public class MainActivity extends ActionBarActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         String result = settings.getString(PREF_POSTS, null);
         if (result != null) {
-            displayResult(result);
+            //displayResult(result);
         }
         super.onResume();
+
         // Add your code here.
         // Set some default...
         // Then start to request location updates, directing them to locationListener.
@@ -156,6 +198,13 @@ public class MainActivity extends ActionBarActivity {
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 
+    public void updateLatLong() {
+        TextView latView = (TextView) findViewById(R.id.latView);
+        TextView longView = (TextView) findViewById(R.id.longView);
+
+        latView.setText("lat: " + Double.toString(curr_lat));
+        longView.setText("long: " + Double.toString(curr_long));
+    }
     /**
      * Listenes to the location, and gets the most precise recent location.
      */
@@ -164,6 +213,9 @@ public class MainActivity extends ActionBarActivity {
         public void onLocationChanged(Location location) {
             lastLocation = location;
             Log.i(LOG_TAG, location.toString());
+            curr_long = lastLocation.getLongitude();
+            curr_lat = lastLocation.getLatitude();
+            updateLatLong();
         }
 
         @Override
@@ -178,12 +230,15 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onPause() {
+
         // Stops the location updates.
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationManager.removeUpdates(locationListener);
+
         // Disables the submit button.
         Button submitButton = (Button) findViewById(R.id.button);
         submitButton.setEnabled(false);
+
         // Stops the upload if any.
         if (uploader != null) {
             uploader.cancel(true);
@@ -215,8 +270,8 @@ public class MainActivity extends ActionBarActivity {
             return;
         }
 
-        double lat = thisLocation.getLatitude();
-        double longit = thisLocation.getLongitude();
+        double lat = curr_lat;
+        double longit = curr_long;
 
         m.put("msgid", reallyComputeHash(msg));
         m.put("msg", msg);
@@ -252,8 +307,8 @@ public class MainActivity extends ActionBarActivity {
         }
 
 
-        double lat = thisLocation.getLatitude();
-        double longit = thisLocation.getLongitude();
+        double lat = curr_lat;
+        double longit = curr_long;
 
         Log.i(LOG_TAG, "using this as lat " + lat);
         Log.i(LOG_TAG, "using this as long " + longit);
@@ -337,31 +392,22 @@ public class MainActivity extends ActionBarActivity {
         // Fills aList, so we can fill the listView.
 
         aList.clear();
+        SimpleDateFormat  format = new SimpleDateFormat("MM-cc");
+
         for (int i = 0; i < ml.messages.length; i++) {
             Message m = ml.messages[i];
             String msg = m.getMsg();
             String ts = m.getTs();
-
-            DateFormat format = new SimpleDateFormat("d/M, Ha", Locale.ENGLISH);
-            Date date = new Date();
-            try {
-                date = format.parse(ts);
-            } catch (ParseException e) {
-                Log.e(LOG_TAG, "Unable to parse date");
-                return;
-            }
-
-            String convertedTs = date.toString();
-
             String msgid = m.getMsgid();
+
 
             String loggz = "msgid: " + msgid + " msg: " + msg + " ts: " + ts;
             Log.d(LOG_TAG, loggz);
 
             ListElement ael = new ListElement();
-            ael.msgid = msgid;
+            ael.msgid = "";
             ael.msg = msg;
-            ael.ts = convertedTs;
+            ael.ts = ts;
             aList.add(ael);
 
         }
