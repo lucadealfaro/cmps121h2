@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Bulletin Board</string>
+    <string name="app_name">hw2</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -9,4 +9,5 @@
     <string name="success">Success</string>
     <string name="failure">Failure</string>
     <string name="post_msg">Post</string>
+    <string name="refresh_msg">Refresh</string>
 </resources>

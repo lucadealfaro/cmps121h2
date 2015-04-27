@@ -25,6 +25,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="65dp" />
 
+
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,5 +34,14 @@
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/editText"
         android:paddingBottom="5dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/refresh_msg"
+        android:id="@+id/refreshButton"
+        android:onClick="clickRefresh"
+        android:layout_alignParentBottom="true"
+         />
 
 </RelativeLayout>
