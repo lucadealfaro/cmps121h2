@@ -25,8 +25,6 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
-import org.w3c.dom.Text;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
@@ -36,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.TimeZone;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -410,14 +408,15 @@ public class MainActivity extends ActionBarActivity {
             String ts = m.getTs();
             String msgid = m.getMsgid();
 
+            String convertedTs = getRelevantTimeDiff(ts);
 
-            String loggz = "msgid: " + msgid + " msg: " + msg + " ts: " + ts;
+            String loggz = "msgid: " + msgid + " msg: " + msg + " ts: " + convertedTs;
             Log.d(LOG_TAG, loggz);
 
             ListElement ael = new ListElement();
             //ael.msgid = "";
             ael.msg = msg;
-            ael.ts = ts;
+            ael.ts = convertedTs;
             aList.add(ael);
 
         }
@@ -445,6 +444,36 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private String getRelevantTimeDiff(String ts){
+        DateFormat targetFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+        targetFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date timestampDate = new Date();
+        String result = "";
+        //parse date.
+        //this can easily throw a ParseException so you should probably catch that
+        try {
+            timestampDate = targetFormat.parse(ts);
+            //Get current UTC time
+            Date now = new Date();
+
+            long diff = now.getTime() - timestampDate.getTime();
+
+            long diffSeconds = diff / 1000 % 60;
+            long diffMinutes = diff / (60 * 1000) % 60;
+            long diffHours = diff / (60 * 60 * 1000) % 24;
+            long diffDays = diff / (24 * 60 * 60 * 1000);
+
+            result = Long.toString(diffHours) + "h " + Long.toString(diffMinutes) + "m ago";
+            Log.d(LOG_TAG, "time diff = " + diff);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+
     }
 
 }
