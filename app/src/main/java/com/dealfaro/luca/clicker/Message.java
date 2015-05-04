@@ -16,6 +16,15 @@ public class Message {
     @SerializedName("ts")
     String ts;
 
+    @SerializedName("dest")
+    String dest;
+
+    @SerializedName("conversation")
+    Boolean conv;
+
+    @SerializedName("userid")
+    String userid;
+
     public String getMsg() {
         return msg;
     }
@@ -27,4 +36,10 @@ public class Message {
     public String getTs() {
         return ts;
     }
+
+    public Boolean getConv() { return conv; }
+
+    public String getDest() { return dest; }
+
+    public String getUserId() { return userid; }
 }

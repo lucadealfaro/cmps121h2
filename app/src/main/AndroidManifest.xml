@@ -20,6 +20,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.dealfaro.luca.clicker.ChatActivity"
+            android:label="@string/app_name" >
+        </activity>
+
     </application>
 
 </manifest>

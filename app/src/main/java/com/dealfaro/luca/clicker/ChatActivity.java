@@ -1,7 +1,6 @@
 package com.dealfaro.luca.clicker;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
@@ -39,14 +38,14 @@ import java.util.List;
 import java.util.TimeZone;
 
 
-public class MainActivity extends ActionBarActivity {
+public class ChatActivity extends ActionBarActivity {
 
     Location lastLocation = new Location("dummyprovider");
 
     private double lastAccuracy = (double) 1e10;
     private long lastAccuracyTime = 0;
 
-    private static final String LOG_TAG = "local_msger";
+    private static final String LOG_TAG = "local_msger_chat";
 
 
 
@@ -63,7 +62,9 @@ public class MainActivity extends ActionBarActivity {
     private ServerCall uploader;
     private double curr_lat = 20.3;
     private double curr_long = 20.3;
+
     private AppInfo appInfo;
+    private String otherUser;
 
     private ArrayList<String> accountList;
 
@@ -98,7 +99,7 @@ public class MainActivity extends ActionBarActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             LinearLayout newView;
 
-            final ListElement w = getItem(position);
+            ListElement w = getItem(position);
 
             // Inflate a new view if necessary.
             if (convertView == null) {
@@ -119,33 +120,9 @@ public class MainActivity extends ActionBarActivity {
             if (!w.conv) {
                 chatCircle.setVisibility(View.INVISIBLE);
             }
-
             //tvMsgId.setText(w.msgid);
             tvMsg.setText(w.msg);
             tvTs.setText(w.ts);
-
-            // Set a listener for the whole list item.
-            newView.setTag(w.dest);
-            newView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    String dest = w.dest;
-                    String sender = w.sender;
-
-                    if (sender == appInfo.userid) return;
-
-                    Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-                    intent.putExtra("dest", dest);
-
-                    startActivity(intent);
-
-                    Log.d(LOG_TAG, "Destination: " + dest + " Sender: " + sender);
-                    //int duration = Toast.LENGTH_SHORT;
-                    //Toast toast = Toast.makeText(context, s, duration);
-                    //toast.show();
-                }
-            });
 
             return newView;
         }
@@ -164,7 +141,15 @@ public class MainActivity extends ActionBarActivity {
         myListView.setAdapter(aa);
         aa.notifyDataSetChanged();
         appInfo = AppInfo.getInstance(this);
+        Bundle extras = getIntent().getExtras();
+        String dest;
 
+        if(extras == null) {
+            dest= "";
+        } else {
+            dest= extras.getString("sender");
+        }
+        Log.d(LOG_TAG, "sent from" + dest);
     }
 
     @Override
@@ -186,7 +171,7 @@ public class MainActivity extends ActionBarActivity {
 
 
         myCallSpec.url = SERVER_URL_PREFIX + "get_local";
-        myCallSpec.context = MainActivity.this;
+        myCallSpec.context = ChatActivity.this;
         // Let's add the parameters.
         HashMap<String,String> m = new HashMap<String,String>();
 
@@ -293,7 +278,7 @@ public class MainActivity extends ActionBarActivity {
 
 
         myCallSpec.url = SERVER_URL_PREFIX + "put_local";
-        myCallSpec.context = MainActivity.this;
+        myCallSpec.context = ChatActivity.this;
         // Let's add the parameters.
         HashMap<String,String> m = new HashMap<String,String>();
 
@@ -329,7 +314,7 @@ public class MainActivity extends ActionBarActivity {
         startSpinner();
 
         myCallSpec.url = SERVER_URL_PREFIX + "get_local";
-        myCallSpec.context = MainActivity.this;
+        myCallSpec.context = ChatActivity.this;
         // Let's add the parameters.
         HashMap<String,String> m = new HashMap<String,String>();
 
@@ -451,23 +436,16 @@ public class MainActivity extends ActionBarActivity {
             String msg = m.getMsg();
             String ts = m.getTs();
             String msgid = m.getMsgid();
-            Boolean conv = m.getConv();
-            String dest = m.getDest();
-            String userid = m.getUserId();
 
             String convertedTs = getRelevantTimeDiff(ts);
 
-            String loggz = "msgid: " + msgid + " msg: " + msg + " ts: " + convertedTs + " dest: " + dest + " conv: " + conv;
+            String loggz = "msgid: " + msgid + " msg: " + msg + " ts: " + convertedTs;
             Log.d(LOG_TAG, loggz);
 
             ListElement ael = new ListElement();
             //ael.msgid = "";
             ael.msg = msg;
             ael.ts = convertedTs;
-            ael.dest = dest;
-            ael.conv = conv;
-            ael.sender = userid;
-
             aList.add(ael);
 
         }
