@@ -133,7 +133,8 @@ public class MainActivity extends ActionBarActivity {
                     String dest = w.dest;
                     String sender = w.sender;
 
-                    if (sender == appInfo.userid) return;
+                    //if the sender isn't in the message, let's not load the private chat
+                    if (sender.equals(appInfo.userid) || sender.equals("")) return;
 
                     Intent intent = new Intent(MainActivity.this, ChatActivity.class);
                     intent.putExtra("dest", dest);
@@ -312,6 +313,7 @@ public class MainActivity extends ActionBarActivity {
 
         m.put("lat", Double.toString(lat));
         m.put("lng", Double.toString(longit));
+        m.put("userid", appInfo.userid);
 
         myCallSpec.setParams(m);
         // Actual server call.

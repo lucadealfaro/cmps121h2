@@ -64,7 +64,7 @@ public class ChatActivity extends ActionBarActivity {
     private double curr_long = 20.3;
 
     private AppInfo appInfo;
-    private String otherUser;
+    private String sender;
 
     private ArrayList<String> accountList;
 
@@ -142,12 +142,12 @@ public class ChatActivity extends ActionBarActivity {
         aa.notifyDataSetChanged();
         appInfo = AppInfo.getInstance(this);
         Bundle extras = getIntent().getExtras();
-        String dest;
+        String dest = "";
 
         if(extras == null) {
-            dest= "";
+            sender= "";
         } else {
-            dest= extras.getString("sender");
+            sender= extras.getString("sender");
         }
         Log.d(LOG_TAG, "sent from" + dest);
     }
@@ -192,6 +192,7 @@ public class ChatActivity extends ActionBarActivity {
         m.put("lat", Double.toString(lat));
         m.put("lng", Double.toString(longit));
         m.put("userid", appInfo.userid);
+        m.put("dest", sender);
 
         myCallSpec.setParams(m);
         // Actual server call.
@@ -297,6 +298,8 @@ public class ChatActivity extends ActionBarActivity {
 
         m.put("lat", Double.toString(lat));
         m.put("lng", Double.toString(longit));
+        m.put("userid", appInfo.userid);
+        m.put("dest", sender);
 
         myCallSpec.setParams(m);
         // Actual server call.
@@ -335,6 +338,7 @@ public class ChatActivity extends ActionBarActivity {
         m.put("lat", Double.toString(lat));
         m.put("lng", Double.toString(longit));
         m.put("userid", appInfo.userid);
+        m.put("dest", sender);
 
         myCallSpec.setParams(m);
         // Actual server call.
